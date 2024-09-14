@@ -8,7 +8,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.avaneesh.gridpro.presentation.CameraScreen
 import com.avaneesh.gridpro.ui.theme.GridProTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,12 +25,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             GridProTheme {
-               CameraScreen()
+               CameraScreen(this)
             }
         }
     }
 
-    private fun arePermissionsGranted(): Boolean {
+    fun arePermissionsGranted(): Boolean {
         return CAMERA_PERMISSIONS.all { permission ->
             ContextCompat.checkSelfPermission(
                 applicationContext, permission
