@@ -13,11 +13,9 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.video.FileOutputOptions
 import androidx.camera.video.Recording
-import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.video.AudioConfig
@@ -95,7 +93,15 @@ class CameraRepositoryImpl @Inject constructor(
                     recording = null
                 } else {
                     CoroutineScope(Dispatchers.IO).launch {
-                        saveVideo(file)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            saveVideo(file)
+                        } else {
+                            Toast.makeText(
+                                application,
+                                "You need minimum Android 10 to save media",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
             }
@@ -146,6 +152,63 @@ class CameraRepositoryImpl @Inject constructor(
                     )
                     resolver.update(
                         uri, imageContentValues, null, null
+                    )
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    resolver.delete(uri, null, null)
+                }
+            }
+        }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private suspend fun saveVideo(file: File) {
+        withContext(Dispatchers.IO) {
+            val resolver: ContentResolver = application.contentResolver
+
+            val videoCollection = MediaStore.Video.Media.getContentUri(
+                MediaStore.VOLUME_EXTERNAL_PRIMARY
+            )
+
+            val appName = application.getString(R.string.app_name)
+            val timeInMillis = System.currentTimeMillis()
+
+            val videoContentValues: ContentValues = ContentValues().apply {
+                put(
+                    MediaStore.Video.Media.DISPLAY_NAME,
+                    file.name
+                )
+                put(
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    Environment.DIRECTORY_DCIM + "/$appName"
+                )
+                put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+                put(MediaStore.MediaColumns.DATE_ADDED, timeInMillis / 1000)
+                put(MediaStore.MediaColumns.DATE_MODIFIED, timeInMillis / 1000)
+                put(MediaStore.MediaColumns.DATE_TAKEN, timeInMillis)
+                put(MediaStore.Video.Media.IS_PENDING, 1)
+            }
+
+            val videoMediaStoreUri: Uri? = resolver.insert(
+                videoCollection, videoContentValues
+            )
+
+            videoMediaStoreUri?.let { uri ->
+                try {
+                    resolver.openOutputStream(uri)?.use { outputStream ->
+                        resolver.openInputStream(
+                            Uri.fromFile(file)
+                        )?.use { inputStream ->
+                            inputStream.copyTo(outputStream)
+                        }
+                    }
+
+                    videoContentValues.clear()
+                    videoContentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                    resolver.update(
+                        uri, videoContentValues, null, null
                     )
 
                 } catch (e: Exception) {
