@@ -1,6 +1,7 @@
 package com.avaneesh.gridpro.presentation
 
 import androidx.camera.view.LifecycleCameraController
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avaneesh.gridpro.domain.repository.CameraRepository
@@ -18,6 +19,25 @@ class CameraViewModel @Inject constructor(
 
     private val _isRecording = MutableStateFlow(false)
     val isRecording = _isRecording.asStateFlow()
+
+    private val _selectedGrid = MutableStateFlow("Rule of Thirds")
+    val selectedGrid = _selectedGrid.asStateFlow()
+
+    private val _customGridLines = MutableStateFlow(listOf<Pair<Offset, Offset>>())
+    val customGridLines = _customGridLines.asStateFlow()
+
+    // Function to change the selected grid
+    fun selectGrid(grid: String) {
+        _selectedGrid.value = grid
+    }
+
+    fun updateCustomGridLines(lines: List<Pair<Offset, Offset>>) {
+        _customGridLines.value = lines
+    }
+
+    fun clearCustomGridLines() {
+        _customGridLines.value = emptyList()
+    }
 
     fun onTakePhoto(
         controller: LifecycleCameraController
