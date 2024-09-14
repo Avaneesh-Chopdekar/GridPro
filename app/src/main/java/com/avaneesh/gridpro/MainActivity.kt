@@ -1,46 +1,45 @@
 package com.avaneesh.gridpro
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.avaneesh.gridpro.presentation.CameraScreen
 import com.avaneesh.gridpro.ui.theme.GridProTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!arePermissionsGranted()) {
+            ActivityCompat.requestPermissions(
+                this,
+                CAMERA_PERMISSIONS,
+                100
+            )
+        }
+
         setContent {
             GridProTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+               CameraScreen()
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    private fun arePermissionsGranted(): Boolean {
+        return CAMERA_PERMISSIONS.all { permission ->
+            ContextCompat.checkSelfPermission(
+                applicationContext, permission
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    GridProTheme {
-        Greeting("Android")
+    companion object {
+        val CAMERA_PERMISSIONS = arrayOf(
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.RECORD_AUDIO
+        )
     }
 }
