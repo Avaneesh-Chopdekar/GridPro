@@ -58,14 +58,22 @@ class CameraRepositoryImpl @Inject constructor(
                     CoroutineScope(Dispatchers.IO).launch {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             saveImage(imageBitmap)
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    application,
+                                    "Photo saved to gallery",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         } else {
-                            Toast.makeText(
-                                application,
-                                "You need minimum Android 10 to save media",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    application,
+                                    "You need minimum Android 10 to save media",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
-
                     }
                 }
             }
@@ -95,12 +103,21 @@ class CameraRepositoryImpl @Inject constructor(
                     CoroutineScope(Dispatchers.IO).launch {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             saveVideo(file)
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    application,
+                                    "Recording saved to gallery",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         } else {
-                            Toast.makeText(
-                                application,
-                                "You need minimum Android 10 to save media",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    application,
+                                    "You need minimum Android 10 to save media",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
                     }
                 }
