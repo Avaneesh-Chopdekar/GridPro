@@ -113,17 +113,7 @@ fun CameraScreen(
                             .size(45.dp)
                             .background(MaterialTheme.colorScheme.primary)
                             .clickable {
-                                if (selectedGrid == "Custom") {
-                                    cameraViewModel.clearCustomGridLines()
-                                } else {
-                                    Toast
-                                        .makeText(
-                                            activity.applicationContext,
-                                            "Only Works With Custom Grid",
-                                            Toast.LENGTH_LONG
-                                        )
-                                        .show()
-                                }
+                                cameraViewModel.clearCustomGridLines()
                             },
                         contentAlignment = Alignment.Center
                     ) {
